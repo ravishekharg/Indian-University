@@ -1,0 +1,7 @@
+---
+- name: Install Jenkins
+  hosts: devops
+  become: yes
+  roles:
+    - jenkins
+    - devops-tools

@@ -1,0 +1,17 @@
+---
+- name: Join Workers
+
+  hosts: k8s_workers
+
+  become: yes
+
+  tasks:
+
+    - name: Read join command from controller
+      set_fact:
+        join_command: "{{ lookup('file', '/tmp/join-command.sh') }}"
+
+    - name: Join worker node
+      shell: "{{ join_command }}"
+      args:
+        creates: /etc/kubernetes/kubelet.conf

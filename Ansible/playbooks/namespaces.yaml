@@ -1,0 +1,40 @@
+---
+- name: Create Kubernetes Namespaces
+
+  hosts: k8s_master
+
+  become: yes
+
+  tasks:
+
+    - name: Create university namespace
+      shell: |
+        kubectl create namespace university \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+    - name: Create monitoring namespace
+      shell: |
+        kubectl create namespace monitoring \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+    - name: Create logging namespace
+      shell: |
+        kubectl create namespace logging \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+    - name: Create ingress-nginx namespace
+      shell: |
+        kubectl create namespace ingress-nginx \
+        --dry-run=client -o yaml | kubectl apply -f -
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf

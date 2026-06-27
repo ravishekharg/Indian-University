@@ -1,0 +1,53 @@
+resource "aws_instance" "k8s_worker_1" {
+
+  ami           = var.ami_id
+  instance_type = "t3.large"
+
+  subnet_id = var.public_subnet_id
+
+  key_name = var.key_name
+
+  vpc_security_group_ids = [
+    var.k8s_sg_id
+  ]
+
+  iam_instance_profile = var.ec2_profile_name
+
+  root_block_device {
+
+    volume_size = 40
+
+    volume_type = "gp3"
+  }
+
+  tags = {
+    Name = "k8s-worker-1"
+  }
+}
+
+resource "aws_instance" "k8s_worker_2" {
+
+  ami           = var.ami_id
+  instance_type = "t3.large"
+
+  subnet_id = var.public_subnet_id
+
+  key_name = var.key_name
+
+  vpc_security_group_ids = [
+    var.k8s_sg_id
+  ]
+
+  iam_instance_profile = var.ec2_profile_name
+
+  root_block_device {
+
+    volume_size = 40
+
+    volume_type = "gp3"
+  }
+
+  tags = {
+    Name = "k8s-worker-2"
+  }
+}

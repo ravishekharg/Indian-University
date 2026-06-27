@@ -1,0 +1,26 @@
+---
+- name: Deploy Monitoring Stack
+
+  hosts: k8s_master
+
+  become: yes
+
+  tasks:
+
+    - name: Add monitoring repo
+      shell: |
+        helm repo add prometheus-community \
+        https://prometheus-community.github.io/helm-charts
+
+    - name: Update repo
+      shell: helm repo update
+
+    - name: Install kube-prometheus-stack
+      shell: |
+        helm upgrade --install monitoring \
+        prometheus-community/kube-prometheus-stack \
+        --namespace monitoring \
+        --create-namespace
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf

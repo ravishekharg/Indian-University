@@ -1,0 +1,42 @@
+{
+  "title": "University Business Dashboard",
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "Student Searches",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "student_search_total"
+        }
+      ]
+    },
+    {
+      "title": "Course Requests",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "course_requests_total"
+        }
+      ]
+    },
+    {
+      "title": "Attendance Requests",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "attendance_requests_total"
+        }
+      ]
+    },
+    {
+      "title": "Searches Per Minute",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(student_search_total[1m])"
+        }
+      ]
+    }
+  ]
+}

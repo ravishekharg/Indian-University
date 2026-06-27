@@ -1,0 +1,22 @@
+---
+- name: Add Cassandra Repo
+  copy:
+    dest: /etc/yum.repos.d/cassandra.repo
+    content: |
+      [cassandra]
+      name=Apache Cassandra
+      baseurl=https://downloads.apache.org/cassandra/redhat/50x/
+      enabled=1
+      gpgcheck=0
+
+- name: Install Cassandra
+  dnf:
+    name:
+      - cassandra
+    state: present
+
+- name: Start Cassandra
+  systemd:
+    name: cassandra
+    enabled: yes
+    state: started

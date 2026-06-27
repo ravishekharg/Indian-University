@@ -1,0 +1,142 @@
+pipeline {
+
+    agent any
+
+    environment {
+
+        AWS_REGION = "ap-south-2"
+
+        AWS_ACCOUNT_ID = "YOUR_ACCOUNT_ID"
+
+        FRONTEND_REPO =
+        "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/university-frontend"
+
+        BACKEND_REPO =
+        "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/university-backend"
+
+        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+
+        stage('Checkout') {
+
+            steps {
+
+                git branch: 'main',
+
+                url: 'https://github.com/your-org/Gurram-University.git'
+            }
+        }
+
+        stage('Build Frontend') {
+
+            steps {
+
+                sh '''
+                cd Application/frontend
+
+                npm install
+
+                npm run build
+                '''
+            }
+        }
+
+        stage('Build Backend') {
+
+            steps {
+
+                sh '''
+                cd Application/backend
+
+                pip install -r requirements.txt
+                '''
+            }
+        }
+
+        stage('Build Docker Images') {
+
+            steps {
+
+                sh '''
+                docker build \
+                -t university-frontend:${BUILD_NUMBER} \
+                Application/frontend
+
+                docker build \
+                -t university-backend:${BUILD_NUMBER} \
+                Application/backend
+                '''
+            }
+        }
+
+        stage('Login ECR') {
+
+            steps {
+
+                sh '''
+                aws ecr get-login-password \
+                --region ${AWS_REGION} |
+
+                docker login \
+                --username AWS \
+                --password-stdin \
+                ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                '''
+            }
+        }
+
+        stage('Push Frontend') {
+
+            steps {
+
+                sh '''
+
+                docker tag \
+                university-frontend:${BUILD_NUMBER} \
+                ${FRONTEND_REPO}:${BUILD_NUMBER}
+
+                docker push \
+                ${FRONTEND_REPO}:${BUILD_NUMBER}
+                '''
+            }
+        }
+
+        stage('Push Backend') {
+
+            steps {
+
+                sh '''
+
+                docker tag \
+                university-backend:${BUILD_NUMBER} \
+                ${BACKEND_REPO}:${BUILD_NUMBER}
+
+                docker push \
+                ${BACKEND_REPO}:${BUILD_NUMBER}
+                '''
+            }
+        }
+
+        stage('Deploy') {
+
+            steps {
+
+                sh '''
+
+                helm upgrade --install frontend \
+                Helm/frontend \
+                -n university \
+                --set image.tag=${BUILD_NUMBER}
+
+                helm upgrade --install backend \
+                Helm/backend \
+                -n university \
+                --set image.tag=${BUILD_NUMBER}
+
+                '''
+            }
+        }
+    }
+}

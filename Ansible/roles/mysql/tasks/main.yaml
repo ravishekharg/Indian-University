@@ -1,0 +1,23 @@
+---
+- name: Install MySQL Repository
+  dnf:
+    name: https://dev.mysql.com/get/mysql84-community-release-el9-1.noarch.rpm
+    disable_gpg_check: yes
+    state: present
+
+- name: Install MySQL Server
+  dnf:
+    name:
+      - mysql-community-server
+    state: present
+
+- name: Start MySQL
+  systemd:
+    name: mysqld
+    enabled: yes
+    state: started
+
+- name: Wait for MySQL
+  wait_for:
+    port: 3306
+    timeout: 60

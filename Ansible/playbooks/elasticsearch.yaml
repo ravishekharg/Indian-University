@@ -1,0 +1,26 @@
+---
+- name: Elasticsearch
+
+  hosts: k8s_master
+
+  become: yes
+
+  tasks:
+
+    - name: Add Elastic repo
+  shell: |
+    helm repo add elastic \
+    https://helm.elastic.co
+
+- name: Update Helm Repositories
+  shell: helm repo update
+
+- name: Install Elasticsearch
+  shell: |
+    helm upgrade --install elasticsearch \
+    elastic/elasticsearch \
+    --namespace logging \
+    --create-namespace
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf

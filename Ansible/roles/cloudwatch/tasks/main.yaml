@@ -1,0 +1,11 @@
+---
+- name: Download CloudWatch Agent
+  dnf:
+    name: amazon-cloudwatch-agent
+    state: present
+
+- name: Enable CloudWatch Agent
+  systemd:
+    name: amazon-cloudwatch-agent
+    enabled: yes
+    state: started

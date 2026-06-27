@@ -1,0 +1,40 @@
+---
+- name: Update package cache
+  dnf:
+    update_cache: yes
+
+- name: Install common packages
+  dnf:
+    name:
+      - git
+      - curl
+      - wget
+      - unzip
+      - vim
+      - jq
+      - net-tools
+      - bind-utils
+      - tar
+      - bash-completion
+      - python3
+      - python3-pip
+    state: present
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Persist SELinux disabled
+  replace:
+    path: /etc/selinux/config
+    regexp: '^SELINUX=.*'
+    replace: 'SELINUX=disabled'
+
+- name: Disable swap
+  shell: swapoff -a
+
+- name: Remove swap entry
+  replace:
+    path: /etc/fstab
+    regexp: '.*swap.*'
+    replace: ''

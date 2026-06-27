@@ -1,0 +1,16 @@
+---
+- name: Install Calico
+
+  hosts: k8s_master
+
+  become: yes
+
+  tasks:
+
+- name: Install Calico
+  command: >
+    kubectl apply -f
+    https://raw.githubusercontent.com/projectcalico/calico/v3.29.0/manifests/calico.yaml
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf

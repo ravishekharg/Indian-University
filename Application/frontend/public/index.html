@@ -1,0 +1,16 @@
+<script>
+
+async function loadStudents() {
+
+  let response =
+      await fetch('/api/students')
+
+  let data =
+      await response.json()
+
+  document.getElementById("result")
+          .innerHTML =
+          JSON.stringify(data)
+}
+
+</script>

@@ -1,0 +1,18 @@
+---
+- name: Install Helm
+  shell: |
+    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+  args:
+    creates: /usr/local/bin/helm
+
+- name: Verify Helm Installation
+  command: helm version
+
+  register: helm_version
+
+  changed_when: false
+
+- name: Display Helm Version
+  debug:
+    var: helm_version.stdout

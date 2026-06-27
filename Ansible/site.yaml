@@ -1,0 +1,7 @@
+---
+- import_playbook: playbooks/common.yaml
+- import_playbook: playbooks/kubernetes.yaml
+- import_playbook: playbooks/jenkins.yaml
+- import_playbook: playbooks/mysql.yaml
+- import_playbook: playbooks/cassandra.yaml
+- import_playbook: playbooks/cloudwatch.yaml

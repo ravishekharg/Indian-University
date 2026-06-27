@@ -1,0 +1,35 @@
+replicaCount: 3
+
+image:
+  repository: ACCOUNT_ID.dkr.ecr.ap-south-2.amazonaws.com/university-backend
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 5000
+
+mysql:
+  host: 10.0.10.10
+  port: 3306
+
+cassandra:
+  host: 10.0.20.10
+  port: 9042
+
+resources:
+
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+prometheus:
+  enabled: true
+
+ingress:
+  enabled: true
+  host: gurram-university.com

@@ -1,0 +1,42 @@
+{
+  "title": "Database Dashboard",
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "MySQL Queries Per Second",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(mysql_queries_total[1m])"
+        }
+      ]
+    },
+    {
+      "title": "Cassandra Writes Per Second",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(cassandra_writes_total[1m])"
+        }
+      ]
+    },
+    {
+      "title": "Total MySQL Queries",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "mysql_queries_total"
+        }
+      ]
+    },
+    {
+      "title": "Total Cassandra Writes",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "cassandra_writes_total"
+        }
+      ]
+    }
+  ]
+}

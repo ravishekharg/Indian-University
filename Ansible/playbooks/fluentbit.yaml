@@ -1,0 +1,23 @@
+---
+- name: FluentBit
+
+  hosts: k8s_master
+
+  become: yes
+
+  tasks:
+
+    - name: Add Fluent repo
+      shell: |
+        helm repo add fluent \
+        https://fluent.github.io/helm-charts
+
+    - name: Install FluentBit
+      shell: |
+       helm upgrade --install fluent-bit \
+       fluent/fluent-bit \
+       --namespace logging \
+       --create-namespace
+
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf

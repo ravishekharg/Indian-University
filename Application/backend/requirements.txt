@@ -1,0 +1,9 @@
+flask
+flask-cors
+pymysql
+cassandra-driver
+prometheus-client
+gunicorn
+PyJWT
+bcrypt
+python-dotenv

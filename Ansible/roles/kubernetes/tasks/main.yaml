@@ -1,0 +1,50 @@
+---
+- import_tasks: kernel.yaml
+
+- name: Add Kubernetes repo
+  copy:
+    dest: /etc/yum.repos.d/kubernetes.repo
+    content: |
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://pkgs.k8s.io/core:/stable:/v1.31/rpm/
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://pkgs.k8s.io/core:/stable:/v1.31/rpm/repodata/repomd.xml.key
+
+- name: Install Kubernetes packages
+  dnf:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    disable_excludes: kubernetes
+
+- name: Enable and Start kubelet
+  systemd:
+    name: kubelet
+    enabled: yes
+    state: started
+
+- name: Verify kubeadm
+  command: kubeadm version
+
+  register: kubeadm_version
+
+  changed_when: false
+
+- name: Show kubeadm version
+  debug:
+    var: kubeadm_version.stdout
+
+- name: Verify kubectl
+  command: kubectl version --client
+
+  register: kubectl_version
+
+  changed_when: false
+
+- name: Show kubectl version
+  debug:
+    var: kubectl_version.stdout

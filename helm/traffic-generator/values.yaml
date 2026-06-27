@@ -1,0 +1,5 @@
+replicaCount: 1
+
+image:
+  repository: ACCOUNT_ID.dkr.ecr.ap-south-2.amazonaws.com/traffic-generator
+  tag: latest

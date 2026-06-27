@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: backend-config
+
+data:
+
+  MYSQL_HOST: "{{ .Values.mysql.host }}"
+  MYSQL_PORT: "{{ .Values.mysql.port }}"
+
+  CASSANDRA_HOST: "{{ .Values.cassandra.host }}"
+  CASSANDRA_PORT: "{{ .Values.cassandra.port }}"
