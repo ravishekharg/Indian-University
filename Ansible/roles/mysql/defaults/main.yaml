@@ -1,0 +1,12 @@
+---
+mysql_app_database: university
+# mysql_root_password, mysql_app_user, mysql_app_password are intentionally
+# NOT defaulted here - they must come from an ansible-vault encrypted file
+# (e.g. inventories/dev/group_vars/all/vault.yaml) so real credentials are
+# never committed in plaintext. Example:
+#
+#   ansible-vault create inventories/dev/group_vars/all/vault.yaml
+#   ---
+#   mysql_root_password: "..."
+#   mysql_app_user: "university_app"
+#   mysql_app_password: "..."

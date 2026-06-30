@@ -1,0 +1,42 @@
+<svg width="680" height="360" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+<rect width="680" height="360" fill="#ffffff"/>
+
+<rect x="30" y="30" width="300" height="300" rx="20" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="50" y="60" font-size="14" font-weight="500" fill="#26215C">Frontend Helm chart</text>
+
+<rect x="350" y="30" width="300" height="300" rx="20" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="370" y="60" font-size="14" font-weight="500" fill="#26215C">Backend Helm chart</text>
+
+<rect x="55" y="80" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="115" y="100" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">Deployment</text>
+
+<rect x="185" y="80" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="245" y="100" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">Service</text>
+
+<rect x="55" y="140" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="115" y="160" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">ConfigMap</text>
+
+<rect x="185" y="140" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="245" y="160" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">HPA</text>
+
+<rect x="120" y="200" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="180" y="220" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">Ingress</text>
+
+<rect x="375" y="80" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="435" y="100" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">Deployment</text>
+
+<rect x="505" y="80" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="565" y="100" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">Service</text>
+
+<rect x="375" y="140" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="435" y="160" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">ConfigMap</text>
+
+<rect x="505" y="140" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="565" y="160" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">HPA</text>
+
+<rect x="440" y="200" width="120" height="40" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="0.5"/>
+<text x="500" y="220" text-anchor="middle" dominant-baseline="central" font-size="14" fill="#26215C">Ingress</text>
+
+<text x="50" y="280" font-size="12" fill="#3C3489">Deployed and upgraded by the Jenkins pipeline</text>
+<text x="370" y="280" font-size="12" fill="#3C3489">Deployed and upgraded by the Jenkins pipeline</text>
+</svg>
