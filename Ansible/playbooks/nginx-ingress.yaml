@@ -2,8 +2,11 @@
 - name: Deploy NGINX Ingress
 
   hosts: k8s_master
-
   become: yes
+
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+    PATH: "/usr/local/bin:/usr/bin:/bin"
 
   tasks:
 
@@ -20,7 +23,6 @@
         helm upgrade --install ingress-nginx \
         ingress-nginx/ingress-nginx \
         --namespace ingress-nginx \
-        --create-namespace
-
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
+        --create-namespace \
+        --wait \
+        --timeout 15m

@@ -8,7 +8,7 @@ resource "aws_instance" "devops" {
   ]
   iam_instance_profile = var.jenkins_profile_name
   root_block_device {
-    volume_size = 50
+    volume_size = 100
     volume_type = "gp3"
   }
   tags = {

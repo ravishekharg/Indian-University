@@ -1,26 +1,36 @@
 ---
-- name: Kibana
+- name: Install Kibana
 
   hosts: k8s_master
-
   become: yes
+
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+    PATH: "/usr/local/bin:/usr/bin:/bin"
 
   tasks:
 
-    - name: Add Elastic Repo
+    - name: Add Bitnami repo
       shell: |
-        helm repo add elastic \
-        https://helm.elastic.co
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+      ignore_errors: yes
 
-    - name: Update Helm Repositories
-      shell: helm repo update
+    - name: Update Helm repositories
+      shell: |
+        helm repo update
 
     - name: Install Kibana
       shell: |
         helm upgrade --install kibana \
-        elastic/kibana \
-        --namespace logging \
-        --create-namespace
-
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
+          bitnami/kibana \
+          --namespace logging \
+          --create-namespace \
+          --set elasticsearch.hosts[0]=elasticsearch \
+          --set resources.requests.cpu=250m \
+          --set resources.requests.memory=256Mi \
+          --set resources.limits.cpu=500m \
+          --set resources.limits.memory=512Mi \
+          --wait \
+          --timeout=20m
+      args:
+        executable: /bin/bash

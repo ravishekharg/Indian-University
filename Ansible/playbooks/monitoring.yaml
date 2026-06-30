@@ -9,18 +9,25 @@
 
     - name: Add monitoring repo
       shell: |
-        helm repo add prometheus-community \
+        /usr/local/bin/helm repo add prometheus-community \
         https://prometheus-community.github.io/helm-charts
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
 
     - name: Update repo
-      shell: helm repo update
+      shell: |
+        /usr/local/bin/helm repo update
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
 
     - name: Install kube-prometheus-stack
       shell: |
         helm upgrade --install monitoring \
         prometheus-community/kube-prometheus-stack \
         --namespace monitoring \
-        --create-namespace
-
+        --create-namespace \
+        --wait \
+        --timeout 15m
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
+        PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
