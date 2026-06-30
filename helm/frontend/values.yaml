@@ -2,8 +2,11 @@ replicaCount: 3
 
 image:
   repository: ACCOUNT_ID.dkr.ecr.ap-south-2.amazonaws.com/university-frontend
-  tag: latest
-  pullPolicy: Always
+  # Pin to an explicit, immutable build tag at deploy time
+  # (e.g. --set image.tag=$BUILD_NUMBER) - matches the ECR repo's
+  # IMMUTABLE tag policy, "latest" does not.
+  tag: ""
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
@@ -13,15 +16,13 @@ backend:
   apiUrl: http://backend-service:5000
 
 resources:
-
   requests:
     cpu: 100m
     memory: 128Mi
-
   limits:
     cpu: 300m
     memory: 512Mi
 
 ingress:
   enabled: true
-  host: gurram-university.com
+  host: indian-university.example.com

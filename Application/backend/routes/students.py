@@ -1,48 +1,43 @@
-from flask import Blueprint
+import logging
+
+from flask import Blueprint, jsonify
 
 from db.mysql import get_connection
 
-students = Blueprint(
-    "students",
-    __name__
-)
+logger = logging.getLogger(__name__)
+
+students = Blueprint("students", __name__)
+
 
 @students.route("/students")
 def get_students():
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT id, first_name, last_name, email
+            FROM students
+            ORDER BY id
+            LIMIT 200
+            """
+        )
+        rows = cursor.fetchall()
+        cursor.close()
 
-    conn = get_connection()
-
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT
-            id,
-            first_name,
-            last_name,
-            email
-        FROM students
-        """
-    )
-
-    rows = cursor.fetchall()
-
-    result = []
-
-    for row in rows:
-
-        result.append({
-
-            "id": row[0],
-
-            "first_name": row[1],
-
-            "last_name": row[2],
-
-            "email": row[3]
-        })
-
-    cursor.close()
-    conn.close()
-    
-    return result
+        return jsonify([
+            {
+                "id": row["id"],
+                "first_name": row["first_name"],
+                "last_name": row["last_name"],
+                "email": row["email"],
+            }
+            for row in rows
+        ])
+    except Exception:
+        logger.exception("Failed to fetch students")
+        return jsonify({"error": "failed to fetch students"}), 500
+    finally:
+        if conn is not None:
+            conn.close()

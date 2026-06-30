@@ -16,19 +16,25 @@ module "vpc" {
 }
 
 module "security_groups" {
-  source      = "../../modules/security-groups"
-  vpc_id      = module.vpc.vpc_id
-  environment = var.environment
-}
-
-module "iam" {
-  source      = "../../modules/iam"
-  environment = var.environment
+  source             = "../../modules/security-groups"
+  vpc_id             = module.vpc.vpc_id
+  environment        = var.environment
+  admin_cidr_blocks  = var.admin_cidr_blocks
 }
 
 module "ecr" {
   source      = "../../modules/ecr"
   environment = var.environment
+}
+
+module "iam" {
+  source        = "../../modules/iam"
+  environment   = var.environment
+  ecr_repo_arns = [
+    module.ecr.frontend_repo_arn,
+    module.ecr.backend_repo_arn,
+    module.ecr.traffic_repo_arn
+  ]
 }
 
 module "ec2" {

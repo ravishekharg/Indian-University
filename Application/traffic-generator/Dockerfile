@@ -1,5 +1,14 @@
-FROM python:3.12
+FROM python:3.12-slim
+
+RUN useradd --create-home --uid 1000 appuser
+
 WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-RUN pip install requests
-CMD ["python","traffic.py"]
+
+USER appuser
+
+CMD ["python", "traffic.py"]

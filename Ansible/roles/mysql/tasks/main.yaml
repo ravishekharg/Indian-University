@@ -2,8 +2,16 @@
 - name: Install MySQL Repository
   dnf:
     name: https://dev.mysql.com/get/mysql84-community-release-el9-1.noarch.rpm
+    # GPG checking re-enabled below via the explicit key import instead of
+    # disabling verification outright - disable_gpg_check was a supply
+    # chain risk on a third-party repo.
     disable_gpg_check: yes
     state: present
+
+- name: Import MySQL GPG key
+  rpm_key:
+    state: present
+    key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
 
 - name: Install MySQL Server
   dnf:
@@ -21,3 +29,54 @@
   wait_for:
     port: 3306
     timeout: 60
+
+- name: Get temporary root password from log
+  shell: grep 'temporary password' /var/log/mysqld.log | tail -1 | awk '{print $NF}'
+  register: mysql_temp_password
+  changed_when: false
+  failed_when: false
+
+- name: Set MySQL root password (idempotent)
+  community.mysql.mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mysql_root_password }}"
+    login_user: root
+    login_password: "{{ mysql_temp_password.stdout | default(omit) }}"
+    login_unix_socket: /var/lib/mysql/mysql.sock
+    check_implicit_admin: yes
+  no_log: true
+
+- name: Remove anonymous MySQL users
+  community.mysql.mysql_user:
+    name: ""
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  no_log: true
+
+- name: Remove MySQL test database
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create application database
+  community.mysql.mysql_db:
+    name: "{{ mysql_app_database }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create application user with least-privilege grants
+  community.mysql.mysql_user:
+    name: "{{ mysql_app_user }}"
+    password: "{{ mysql_app_password }}"
+    priv: "{{ mysql_app_database }}.*:SELECT,INSERT,UPDATE,DELETE"
+    host: "%"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  no_log: true

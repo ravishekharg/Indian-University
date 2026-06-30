@@ -1,7 +1,31 @@
 ---
+# Full platform bootstrap, in dependency order. Previously this only
+# imported 6 of the ~17 available playbooks, so running site.yaml alone
+# silently skipped Calico, Helm, ingress, and the whole monitoring/logging
+# stack - all the things that actually make the cluster usable.
+
+# 1. Base OS config on every node
 - import_playbook: playbooks/common.yaml
+
+# 2. Kubernetes packages + cluster bootstrap
 - import_playbook: playbooks/kubernetes.yaml
+- import_playbook: playbooks/k8s-init.yaml
+- import_playbook: playbooks/k8s-join.yaml
+- import_playbook: playbooks/calico.yaml
+- import_playbook: playbooks/helm.yaml
+
+# 3. Cluster namespaces and ingress
+- import_playbook: playbooks/namespaces.yaml
+- import_playbook: playbooks/nginx-ingress.yaml
+
+# 4. Supporting infrastructure
 - import_playbook: playbooks/jenkins.yaml
 - import_playbook: playbooks/mysql.yaml
 - import_playbook: playbooks/cassandra.yaml
 - import_playbook: playbooks/cloudwatch.yaml
+
+# 5. Observability stack
+- import_playbook: playbooks/monitoring.yaml
+- import_playbook: playbooks/elasticsearch.yaml
+- import_playbook: playbooks/fluentbit.yaml
+- import_playbook: playbooks/kibana.yaml

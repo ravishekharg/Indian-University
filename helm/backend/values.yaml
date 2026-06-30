@@ -2,27 +2,39 @@ replicaCount: 3
 
 image:
   repository: ACCOUNT_ID.dkr.ecr.ap-south-2.amazonaws.com/university-backend
-  tag: latest
-  pullPolicy: Always
+  # Pin to an explicit, immutable build tag at deploy time
+  # (e.g. --set image.tag=$BUILD_NUMBER) - never "latest" against an
+  # IMMUTABLE-tag ECR repo.
+  tag: ""
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
   port: 5000
 
 mysql:
-  host: 10.0.10.10
+  host: mysql-server
   port: 3306
+  database: university
 
 cassandra:
-  host: 10.0.20.10
+  host: cassandra-server
   port: 9042
 
-resources:
+# Secrets are intentionally NOT stored here. Provide them at deploy time via
+# `--set secrets.mysqlUser=... --set secrets.mysqlPassword=...` sourced from
+# your CI secret store, or better, use an existingSecret created out-of-band
+# by something like External Secrets Operator / AWS Secrets Manager.
+secrets:
+  existingSecret: ""
+  mysqlUser: ""
+  mysqlPassword: ""
+  jwtSecret: ""
 
+resources:
   requests:
     cpu: 250m
     memory: 512Mi
-
   limits:
     cpu: 500m
     memory: 1Gi
@@ -32,4 +44,4 @@ prometheus:
 
 ingress:
   enabled: true
-  host: gurram-university.com
+  host: indian-university.example.com

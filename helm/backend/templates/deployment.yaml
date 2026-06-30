@@ -18,18 +18,43 @@ spec:
         prometheus.io/path: "/metrics"
         prometheus.io/port: "5000"
     spec:
+      # Spread replicas across nodes instead of letting the scheduler
+      # potentially stack all of them on one node.
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: backend
+              topologyKey: kubernetes.io/hostname
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
       containers:
       - name: backend
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ required \"image.tag must be set to an explicit build tag\" .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop: ["ALL"]
+
         ports:
         - containerPort: 5000
           name: http
+
         envFrom:
         - configMapRef:
             name: backend-config
         - secretRef:
-            name: backend-secret
+            name: {{ .Values.secrets.existingSecret | default "backend-secret" }}
 
         resources:
 {{ toYaml .Values.resources | indent 10 }}

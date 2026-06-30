@@ -1,25 +1,31 @@
-import requests
-
+import logging
+import os
 import random
-
 import time
 
-URL = "http://frontend-service"
+import requests
 
-while True:
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    requests.get(
-        f"{URL}"
-    )
+URL = os.getenv("TARGET_URL", "http://frontend-service")
+MIN_SLEEP = int(os.getenv("MIN_SLEEP_SECONDS", "1"))
+MAX_SLEEP = int(os.getenv("MAX_SLEEP_SECONDS", "5"))
 
-    requests.get(
-        f"{URL}/api/dashboard"
-    )
+ENDPOINTS = ["", "/api/dashboard", "/api/students"]
 
-    requests.get(
-        f"{URL}/api/students"
-    )
 
-    time.sleep(
-        random.randint(1,5)
-    )
+def run():
+    while True:
+        for endpoint in ENDPOINTS:
+            try:
+                response = requests.get(f"{URL}{endpoint}", timeout=5)
+                logging.info("GET %s -> %s", endpoint or "/", response.status_code)
+            except requests.RequestException as exc:
+                # Don't let a single failed request crash the generator loop
+                logging.warning("GET %s failed: %s", endpoint or "/", exc)
+
+        time.sleep(random.randint(MIN_SLEEP, MAX_SLEEP))
+
+
+if __name__ == "__main__":
+    run()

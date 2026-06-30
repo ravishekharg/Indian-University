@@ -13,11 +13,18 @@ resource "aws_instance" "k8s_worker_1" {
 
   iam_instance_profile = var.ec2_profile_name
 
+  monitoring = true
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+  }
+
   root_block_device {
-
     volume_size = 40
-
     volume_type = "gp3"
+    encrypted   = true
   }
 
   tags = {
@@ -40,11 +47,18 @@ resource "aws_instance" "k8s_worker_2" {
 
   iam_instance_profile = var.ec2_profile_name
 
+  monitoring = true
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+  }
+
   root_block_device {
-
     volume_size = 40
-
     volume_type = "gp3"
+    encrypted   = true
   }
 
   tags = {

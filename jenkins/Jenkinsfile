@@ -2,141 +2,167 @@ pipeline {
 
     agent any
 
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
     environment {
-
-        AWS_REGION = "ap-south-2"
-
-        AWS_ACCOUNT_ID = "YOUR_ACCOUNT_ID"
-
-        FRONTEND_REPO =
-        "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/university-frontend"
-
-        BACKEND_REPO =
-        "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/university-backend"
-
-        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+        AWS_REGION     = "ap-south-2"
+        // Set via Jenkins "Manage Jenkins > System > Global properties" or
+        // a credentials binding - never hardcode a real account ID here.
+        AWS_ACCOUNT_ID = credentials('aws-account-id')
+        FRONTEND_REPO  = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/university-frontend"
+        BACKEND_REPO   = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/university-backend"
     }
 
     stages {
 
         stage('Checkout') {
-
             steps {
-
                 git branch: 'main',
+                    url: 'https://github.com/ravishekharg/Indian-University.git'
+            }
+        }
 
-                url: 'https://github.com/your-org/Gurram-University.git'
+        stage('Install Dependencies') {
+            parallel {
+                stage('Frontend') {
+                    steps {
+                        dir('Application/frontend') {
+                            sh 'npm ci'
+                        }
+                    }
+                }
+                stage('Backend') {
+                    steps {
+                        dir('Application/backend') {
+                            sh '''
+                                python3 -m venv .venv
+                                . .venv/bin/activate
+                                pip install -r requirements-dev.txt
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Unit Tests') {
+            parallel {
+                stage('Frontend Tests') {
+                    steps {
+                        dir('Application/frontend') {
+                            sh 'npm test'
+                        }
+                    }
+                }
+                stage('Backend Tests') {
+                    steps {
+                        dir('Application/backend') {
+                            sh '''
+                                . .venv/bin/activate
+                                pytest --junitxml=test-results.xml
+                            '''
+                        }
+                    }
+                    post {
+                        always {
+                            junit 'Application/backend/test-results.xml'
+                        }
+                    }
+                }
             }
         }
 
         stage('Build Frontend') {
-
             steps {
-
-                sh '''
-                cd Application/frontend
-
-                npm install
-
-                npm run build
-                '''
-            }
-        }
-
-        stage('Build Backend') {
-
-            steps {
-
-                sh '''
-                cd Application/backend
-
-                pip install -r requirements.txt
-                '''
+                dir('Application/frontend') {
+                    sh 'npm run build'
+                }
             }
         }
 
         stage('Build Docker Images') {
-
             steps {
-
-                sh '''
-                docker build \
-                -t university-frontend:${BUILD_NUMBER} \
-                Application/frontend
-
-                docker build \
-                -t university-backend:${BUILD_NUMBER} \
-                Application/backend
-                '''
+                sh """
+                    docker build -t university-frontend:${BUILD_NUMBER} Application/frontend
+                    docker build -t university-backend:${BUILD_NUMBER} Application/backend
+                """
             }
         }
 
         stage('Login ECR') {
-
             steps {
-
-                sh '''
-                aws ecr get-login-password \
-                --region ${AWS_REGION} |
-
-                docker login \
-                --username AWS \
-                --password-stdin \
-                ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                '''
+                sh """
+                    aws ecr get-login-password --region ${AWS_REGION} | \
+                    docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                """
             }
         }
 
-        stage('Push Frontend') {
-
+        stage('Push Images') {
             steps {
+                sh """
+                    docker tag university-frontend:${BUILD_NUMBER} ${FRONTEND_REPO}:${BUILD_NUMBER}
+                    docker push ${FRONTEND_REPO}:${BUILD_NUMBER}
 
-                sh '''
-
-                docker tag \
-                university-frontend:${BUILD_NUMBER} \
-                ${FRONTEND_REPO}:${BUILD_NUMBER}
-
-                docker push \
-                ${FRONTEND_REPO}:${BUILD_NUMBER}
-                '''
-            }
-        }
-
-        stage('Push Backend') {
-
-            steps {
-
-                sh '''
-
-                docker tag \
-                university-backend:${BUILD_NUMBER} \
-                ${BACKEND_REPO}:${BUILD_NUMBER}
-
-                docker push \
-                ${BACKEND_REPO}:${BUILD_NUMBER}
-                '''
+                    docker tag university-backend:${BUILD_NUMBER} ${BACKEND_REPO}:${BUILD_NUMBER}
+                    docker push ${BACKEND_REPO}:${BUILD_NUMBER}
+                """
             }
         }
 
         stage('Deploy') {
-
             steps {
+                // NOTE: lowercase "helm/" - the previous "Helm/" reference
+                // would fail on any case-sensitive filesystem (i.e. Linux).
+                // Secrets are injected via Jenkins credentials, never
+                // committed to values.yaml.
+                withCredentials([
+                    string(credentialsId: 'mysql-app-user', variable: 'MYSQL_USER'),
+                    string(credentialsId: 'mysql-app-password', variable: 'MYSQL_PASSWORD'),
+                    string(credentialsId: 'backend-jwt-secret', variable: 'JWT_SECRET')
+                ]) {
+                    sh """
+                        helm upgrade --install frontend helm/frontend \
+                            -n university --create-namespace \
+                            --set image.tag=${BUILD_NUMBER}
 
+                        helm upgrade --install backend helm/backend \
+                            -n university --create-namespace \
+                            --set image.tag=${BUILD_NUMBER} \
+                            --set secrets.mysqlUser=\$MYSQL_USER \
+                            --set secrets.mysqlPassword=\$MYSQL_PASSWORD \
+                            --set secrets.jwtSecret=\$JWT_SECRET
+                    """
+                }
+            }
+        }
+
+        stage('Smoke Tests') {
+            steps {
                 sh '''
-
-                helm upgrade --install frontend \
-                Helm/frontend \
-                -n university \
-                --set image.tag=${BUILD_NUMBER}
-
-                helm upgrade --install backend \
-                Helm/backend \
-                -n university \
-                --set image.tag=${BUILD_NUMBER}
-
+                    kubectl -n university rollout status deployment/backend --timeout=120s
+                    kubectl -n university rollout status deployment/frontend --timeout=120s
+                    kubectl -n university run smoke-test --rm -i --restart=Never \
+                        --image=curlimages/curl -- \
+                        curl -sf http://backend-service.university.svc.cluster.local:5000/health
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Build #${BUILD_NUMBER} deployed successfully."
+        }
+        failure {
+            echo "Build #${BUILD_NUMBER} failed - check the stage logs above."
+        }
+        always {
+            cleanWs()
         }
     }
 }
