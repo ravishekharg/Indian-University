@@ -58,6 +58,7 @@ Cross-check against your own copy before merging - especially the secrets/creden
 - **Single NAT gateway / single AZ for compute.** Fine for a dev/demo environment; call it out explicitly if you ever target production HA.
 - **Vault/External Secrets integration.** I wired Helm and Ansible to expect secrets injected from outside (Jenkins credentials / ansible-vault), but didn't stand up an actual AWS Secrets Manager + External Secrets Operator integration - that's a real infrastructure addition, not a code fix, and needs an AWS account to test against.
 
+<<<<<<< HEAD
 ## Frontend redesign (added after the initial review)
 
 The original frontend had no real homepage, no logo, and an empty/unloaded stylesheet. This was new work, not a "fix" - there was nothing broken to repair, just nothing built yet:
@@ -76,6 +77,8 @@ The original frontend had no real homepage, no logo, and an empty/unloaded style
 
 **Not done** (flagged, not silently skipped): no real browser screenshot of the result exists, since this sandbox has no internet access to `npm install` the project's actual dependencies (`react-router-dom`, `axios`, `@mui/material`) or run a real build - only syntax/JSX-level checks were possible here (all files parse cleanly). Run `npm install && npm start` locally to see it rendered for real.
 
+=======
+>>>>>>> 4606112d88dc7ce4bf04f6d4ac590f7c5cbf4f00
 ## You still need to supply (none of these are in this zip)
 
 - A rotated SSH key pair (after revoking the leaked one).
