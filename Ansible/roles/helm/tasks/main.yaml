@@ -1,18 +1,22 @@
 ---
 - name: Install Helm
   shell: |
+    export PATH=$PATH:/usr/local/bin
     curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
   args:
     creates: /usr/local/bin/helm
 
-- name: Verify Helm Installation
-  command: helm version
-
+- name: Verify Helm
+  command: /usr/local/bin/helm version
   register: helm_version
-
   changed_when: false
 
-- name: Display Helm Version
+- name: Show Helm version
   debug:
     var: helm_version.stdout
+
+- name: Add Helm to global PATH
+  copy:
+    dest: /etc/profile.d/helm.sh
+    content: |
+      export PATH=$PATH:/usr/local/bin

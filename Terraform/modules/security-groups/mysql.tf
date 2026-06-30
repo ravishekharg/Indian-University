@@ -5,6 +5,20 @@ resource "aws_security_group" "mysql" {
 
   ingress {
 
+  description = "SSH from DevOps"
+
+  from_port = 22
+  to_port   = 22
+
+  protocol = "tcp"
+
+  security_groups = [
+    aws_security_group.devops.id
+  ]
+}
+
+  ingress {
+
     description = "MySQL"
 
     from_port = 3306

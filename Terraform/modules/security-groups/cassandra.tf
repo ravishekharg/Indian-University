@@ -5,13 +5,28 @@ resource "aws_security_group" "cassandra" {
 
   ingress {
 
+  description = "SSH from DevOps"
+
+  from_port = 22
+  to_port   = 22
+
+  protocol = "tcp"
+
+  security_groups = [
+    aws_security_group.devops.id
+  ]
+}
+
+  ingress {
+
     from_port = 9042
     to_port   = 9042
 
     protocol = "tcp"
 
     security_groups = [
-      aws_security_group.k8s.id
+      aws_security_group.k8s.id,
+      aws_security_group.devops.id
     ]
   }
 
@@ -23,7 +38,7 @@ resource "aws_security_group" "cassandra" {
     protocol = "tcp"
 
     security_groups = [
-      aws_security_group.k8s.id
+      aws_security_group.k8s.id,
       aws_security_group.devops.id
     ]
   }
@@ -36,7 +51,8 @@ resource "aws_security_group" "cassandra" {
     protocol = "tcp"
 
     security_groups = [
-      aws_security_group.k8s.id
+      aws_security_group.k8s.id,
+      aws_security_group.devops.id
     ]
   }
 
@@ -48,7 +64,8 @@ resource "aws_security_group" "cassandra" {
     protocol = "tcp"
 
     security_groups = [
-      aws_security_group.k8s.id
+      aws_security_group.k8s.id,
+      aws_security_group.devops.id
     ]
   }
 

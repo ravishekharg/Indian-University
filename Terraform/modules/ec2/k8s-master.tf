@@ -15,7 +15,7 @@ resource "aws_instance" "k8s_master" {
 
   root_block_device {
 
-    volume_size = 30
+    volume_size = 50
 
     volume_type = "gp3"
   }

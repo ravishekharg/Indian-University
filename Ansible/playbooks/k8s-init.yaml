@@ -46,9 +46,9 @@
       changed_when: false
 
     - name: Save join command locally
+      become: false
       delegate_to: localhost
       copy:
-        content: |
-          {{ join_command.stdout }}
+        content: "{{ join_command.stdout }}"
         dest: /tmp/join-command.sh
         mode: '0755'

@@ -1,26 +1,41 @@
 ---
-- name: Elasticsearch
+- name: Install Elasticsearch
 
   hosts: k8s_master
-
   become: yes
+
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+    PATH: "/usr/local/bin:/usr/bin:/bin"
 
   tasks:
 
-    - name: Add Elastic repo
-  shell: |
-    helm repo add elastic \
-    https://helm.elastic.co
+    - name: Add Bitnami repo
+      shell: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+      ignore_errors: yes
 
-- name: Update Helm Repositories
-  shell: helm repo update
+    - name: Update Helm repositories
+      shell: |
+        helm repo update
 
-- name: Install Elasticsearch
-  shell: |
-    helm upgrade --install elasticsearch \
-    elastic/elasticsearch \
-    --namespace logging \
-    --create-namespace
-
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
+    - name: Install Elasticsearch
+      shell: |
+        helm upgrade --install elasticsearch \
+          bitnami/elasticsearch \
+          --namespace logging \
+          --create-namespace \
+          --set security.enabled=false \
+          --set master.replicaCount=1 \
+          --set data.replicaCount=0 \
+          --set coordinating.replicaCount=0 \
+          --set ingest.replicaCount=0 \
+          --set master.persistence.enabled=false \
+          --set master.resources.requests.cpu=250m \
+          --set master.resources.requests.memory=512Mi \
+          --set master.resources.limits.cpu=500m \
+          --set master.resources.limits.memory=1Gi \
+          --wait \
+          --timeout=20m
+      args:
+        executable: /bin/bash

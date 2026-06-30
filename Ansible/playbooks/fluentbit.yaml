@@ -1,23 +1,35 @@
 ---
-- name: FluentBit
+- name: Install FluentBit
 
   hosts: k8s_master
-
   become: yes
+
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+    PATH: "/usr/local/bin:/usr/bin:/bin"
 
   tasks:
 
     - name: Add Fluent repo
       shell: |
-        helm repo add fluent \
-        https://fluent.github.io/helm-charts
+        helm repo add fluent https://fluent.github.io/helm-charts
+      ignore_errors: yes
+
+    - name: Update Helm repositories
+      shell: |
+        helm repo update
 
     - name: Install FluentBit
       shell: |
-       helm upgrade --install fluent-bit \
-       fluent/fluent-bit \
-       --namespace logging \
-       --create-namespace
-
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
+        helm upgrade --install fluent-bit \
+          fluent/fluent-bit \
+          --namespace logging \
+          --create-namespace \
+          --set resources.requests.cpu=100m \
+          --set resources.requests.memory=128Mi \
+          --set resources.limits.cpu=250m \
+          --set resources.limits.memory=256Mi \
+          --wait \
+          --timeout=20m
+      args:
+        executable: /bin/bash
